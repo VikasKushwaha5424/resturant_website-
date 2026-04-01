@@ -45,10 +45,34 @@ document.addEventListener('DOMContentLoaded', function() {
       hasError = true;
     }
 
-    // If valid, show success
+    // If valid, send to Flask backend
     if (!hasError) {
-      alert('Thank you for your message! We will get back to you within 24 hours.');
-      form.reset();
+      // 1. Package the data into an object
+      const formData = {
+        name: name,
+        email: email,
+        subject: subject,
+        message: message
+      };
+
+      // 2. Send it to the Flask server
+      fetch('http://127.0.0.1:5000/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Show success and clear the form
+        alert('Thank you for your message! We have saved it to our database.');
+        form.reset();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Oops! Something went wrong connecting to the server.');
+      });
     }
   });
 
