@@ -47,8 +47,39 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (!hasError) {
-      alert('Application submitted successfully! We will contact you on WhatsApp within 2-3 days. Thank you, ' + name + '!');
-      form.reset();
+      var formData = {
+        name: name,
+        phone: phone,
+        email: email,
+        year: year,
+        position: position
+      };
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.textContent = 'Submitting...';
+      submitBtn.disabled = true;
+
+      fetch('http://127.0.0.1:5000/api/careers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Network error');
+        return response.json();
+      })
+      .then(function(data) {
+        alert('Application submitted successfully! We will contact you on WhatsApp within 2-3 days. Thank you, ' + name + '!');
+        form.reset();
+      })
+      .catch(function(error) {
+        console.error('Error:', error);
+        alert('Oops! Make sure the Flask server (app.py) is running.');
+      })
+      .finally(function() {
+        submitBtn.textContent = 'Submit Application';
+        submitBtn.disabled = false;
+      });
     }
   });
 

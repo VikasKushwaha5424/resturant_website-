@@ -54,8 +54,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (!hasError) {
-      alert('Thank you for your catering inquiry! We will contact you within 24 hours to discuss details.');
-      form.reset();
+      var formData = {
+        name: name,
+        phone: phone,
+        email: email,
+        event: event,
+        date: date,
+        guests: guests
+      };
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.textContent = 'Submitting...';
+      submitBtn.disabled = true;
+
+      fetch('http://127.0.0.1:5000/api/catering', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Network error');
+        return response.json();
+      })
+      .then(function(data) {
+        alert('Thank you for your catering inquiry! We will contact you within 24 hours to discuss details.');
+        form.reset();
+      })
+      .catch(function(error) {
+        console.error('Error:', error);
+        alert('Oops! Make sure the Flask server (app.py) is running.');
+      })
+      .finally(function() {
+        submitBtn.textContent = 'Submit Inquiry';
+        submitBtn.disabled = false;
+      });
     }
   });
 

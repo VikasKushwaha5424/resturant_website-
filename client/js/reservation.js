@@ -67,10 +67,42 @@ document.addEventListener('DOMContentLoaded', function() {
       hasError = true;
     }
 
-    // If no errors, show success
+    // If no errors, send to backend
     if (!hasError) {
-      alert('Reservation confirmed! We will send a confirmation to your email shortly.');
-      form.reset();
+      var formData = {
+        name: name,
+        email: email,
+        phone: phone,
+        date: date,
+        time: time,
+        guests: guests
+      };
+
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.textContent = 'Booking...';
+      submitBtn.disabled = true;
+
+      fetch('http://127.0.0.1:5000/api/reservation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Network error');
+        return response.json();
+      })
+      .then(function(data) {
+        alert('Reservation confirmed! We will send a confirmation to your email shortly.');
+        form.reset();
+      })
+      .catch(function(error) {
+        console.error('Error:', error);
+        alert('Oops! Make sure the Flask server (app.py) is running.');
+      })
+      .finally(function() {
+        submitBtn.textContent = 'Book Table';
+        submitBtn.disabled = false;
+      });
     }
   });
 
