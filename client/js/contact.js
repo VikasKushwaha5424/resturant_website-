@@ -12,11 +12,14 @@ document.addEventListener('DOMContentLoaded', function() {
     var email = form.querySelector('[name="email"]').value.trim();
     var subject = form.querySelector('[name="subject"]').value.trim();
     var message = form.querySelector('[name="message"]').value.trim();
+    var submitBtn = form.querySelector('button[type="submit"]');
 
     // Clear previous errors
     var groups = form.querySelectorAll('.form-group');
     for (var i = 0; i < groups.length; i++) {
       groups[i].classList.remove('error');
+      // Also clear the error text immediately
+      groups[i].querySelector('.error-msg').textContent = "";
     }
 
     var hasError = false;
@@ -55,6 +58,10 @@ document.addEventListener('DOMContentLoaded', function() {
         message: message
       };
 
+      // Change button state so user knows it's loading
+      submitBtn.textContent = 'Sending Message...';
+      submitBtn.disabled = true;
+
       // 2. Send it to the Flask server
       fetch('http://127.0.0.1:5000/api/contact', {
         method: 'POST',
@@ -63,15 +70,25 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         body: JSON.stringify(formData)
       })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+           throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
       .then(data => {
         // Show success and clear the form
-        alert('Thank you for your message! We have saved it to our database.');
+        alert('Thank you for your message! It has been saved securely.');
         form.reset();
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('Oops! Something went wrong connecting to the server.');
+        alert('Oops! Ensure your Flask server (app.py) is running in the terminal.');
+      })
+      .finally(() => {
+        // Re-enable the button when done
+        submitBtn.textContent = 'Send Message';
+        submitBtn.disabled = false;
       });
     }
   });
